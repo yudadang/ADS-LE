@@ -19,17 +19,19 @@ model = joblib.load("model.pkl")
 # -----------------------------
 st.subheader("Patient Information")
 
+# ---- NUMERIC FEATURES (must come first) ----
 age = st.slider("Age", 20, 100, 50)
 trestbps = st.slider("Resting Blood Pressure (trestbps)", 80, 200, 120)
 chol = st.slider("Cholesterol (chol)", 100, 600, 250)
 thalch = st.slider("Maximum Heart Rate (thalch)", 70, 220, 150)
 oldpeak = st.slider("ST Depression (oldpeak)", 0.0, 6.0, 1.0, step=0.1)
 
-# Sex (numeric)
-sex_label = st.selectbox("Sex", ["Male", "Female"])
-sex = 1 if sex_label == "Male" else 0
+# ---- CATEGORICAL FEATURES (in exact notebook order) ----
 
-# Chest Pain (cp) mapping
+# sex
+sex = 1 if st.selectbox("Sex", ["Male", "Female"]) == "Male" else 0
+
+# cp
 cp_label = st.selectbox("Chest Pain Type (cp)", [
     "typical angina",
     "atypical angina",
@@ -44,38 +46,26 @@ cp_map = {
 }
 cp = cp_map[cp_label]
 
-# Resting ECG (restecg)
+# restecg
 restecg_label = st.selectbox("Resting ECG (restecg)", [
     "normal",
     "st-t abnormality",
     "lv hypertrophy"
 ])
-restecg_map = {
-    "normal": 0,
-    "st-t abnormality": 1,
-    "lv hypertrophy": 2
-}
+restecg_map = {"normal": 0, "st-t abnormality": 1, "lv hypertrophy": 2}
 restecg = restecg_map[restecg_label]
 
-# Slope (0–2)
+# slope
 slope_label = st.selectbox("Slope", ["upsloping", "flat", "downsloping"])
-slope_map = {
-    "upsloping": 0,
-    "flat": 1,
-    "downsloping": 2
-}
+slope_map = {"upsloping": 0, "flat": 1, "downsloping": 2}
 slope = slope_map[slope_label]
 
-# Thal (0–2)
+# thal
 thal_label = st.selectbox("Thal", ["normal", "fixed defect", "reversable defect"])
-thal_map = {
-    "normal": 0,
-    "fixed defect": 1,
-    "reversable defect": 2
-}
+thal_map = {"normal": 0, "fixed defect": 1, "reversable defect": 2}
 thal = thal_map[thal_label]
 
-# Numeric values
+# other categorical ints
 ca = st.selectbox("Number of Major Vessels (ca)", [0, 1, 2, 3])
 fbs = st.selectbox("Fasting Blood Sugar > 120 mg/dl (fbs)", [0, 1])
 exang = st.selectbox("Exercise-induced Angina (exang)", [0, 1])
@@ -85,22 +75,21 @@ exang = st.selectbox("Exercise-induced Angina (exang)", [0, 1])
 # -----------------------------
 if st.button("Predict Heart Disease Risk"):
 
-    # **IMPORTANT**
-    # EXACT TRAINING ORDER (based on your notebook)
+    # EXACT TRAINING COLUMN ORDER
     input_data = pd.DataFrame([{
         "age": age,
-        "sex": sex,
-        "cp": cp,
         "trestbps": trestbps,
         "chol": chol,
-        "fbs": fbs,
-        "restecg": restecg,
         "thalch": thalch,
-        "exang": exang,
         "oldpeak": oldpeak,
+        "sex": sex,
+        "cp": cp,
+        "restecg": restecg,
         "slope": slope,
+        "thal": thal,
         "ca": ca,
-        "thal": thal
+        "fbs": fbs,
+        "exang": exang
     }])
 
     transformed = preprocessor.transform(input_data)
