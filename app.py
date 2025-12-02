@@ -201,24 +201,24 @@ elif page == "📈 Model Metrics":
     except:
         st.info("⚠️ ROC Curve could not be displayed.")
 
-# =======================================
+# ============================================================
 # 🩺 PREDICTION PAGE
-# =======================================
+# ============================================================
 elif page == "🩺 Prediction":
 
-    st.title("🩺 Heart Disease Prediction Tool")
-    st.write("Enter patient information:")
+    st.header("🩺 Heart Disease Prediction")
 
-    # -----------------------------------
-    # Input Fields
-    # -----------------------------------
+    st.write("Enter patient information to estimate heart disease risk:")
+
+    # ------------ Input Fields -------------
     age = st.slider("Age", 20, 100, 50)
     trestbps = st.slider("Resting Blood Pressure", 80, 200, 120)
     chol = st.slider("Cholesterol", 100, 600, 250)
     thalch = st.slider("Max Heart Rate", 70, 220, 150)
-    oldpeak = st.slider("ST Depression", 0.0, 6.0, 1.0)
+    oldpeak = st.slider("ST Depression", 0.0, 6.0, 1.0, step=0.1)
 
-    sex = 1 if st.selectbox("Sex", ["Male", "Female"]) == "Male" else 0
+    sex = st.selectbox("Sex", ["Male", "Female"])
+    sex = 1 if sex == "Male" else 0
 
     cp_map = {"typical angina":0, "atypical angina":1, "non-anginal":2, "asymptomatic":3}
     cp = cp_map[st.selectbox("Chest Pain Type", list(cp_map.keys()))]
@@ -233,8 +233,38 @@ elif page == "🩺 Prediction":
     thal = thal_map[st.selectbox("Thal", list(thal_map.keys()))]
 
     ca = st.selectbox("Major Vessels (ca)", [0, 1, 2, 3])
-    fbs = st.selectbox("Fasting Blood Sugar >120", [0, 1])
+    fbs = st.selectbox("Fasting Blood Sugar > 120", [0, 1])
     exang = st.selectbox("Exercise-induced Angina", [0, 1])
+
+    if st.button("Predict"):
+
+        input_data = pd.DataFrame([{
+            "age": age,
+            "trestbps": trestbps,
+            "chol": chol,
+            "thalch": thalch,
+            "oldpeak": oldpeak,
+            "sex": sex,
+            "cp": cp,
+            "fbs": fbs,
+            "restecg": restecg,
+            "exang": exang,
+            "slope": slope,
+            "ca": ca,
+            "thal": thal
+        }])
+
+        # 🚫 NO MORE TRANSFORM — model is already a full pipeline
+        probability = model.predict_proba(input_data)[0][1]
+        prediction = model.predict(input_data)[0]
+
+        st.subheader("🔬 Prediction Result")
+        st.write(f"**Heart Disease Probability: {probability*100:.2f}%**")
+
+        if prediction == 1:
+            st.error("⚠️ High risk of heart disease detected!")
+        else:
+            st.success("✅ Low risk of heart disease detected.")
 
     # -----------------------------------
     # Predict Button
@@ -267,4 +297,5 @@ elif page == "🩺 Prediction":
 # =======================================
 st.write("---")
 st.caption("Machine Learning Dashboard using UCI Heart Disease Dataset ❤️")
+
 
