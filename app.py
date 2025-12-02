@@ -154,7 +154,6 @@ if page == "📊 Dashboard":
                      color_continuous_scale="Inferno")
         st.plotly_chart(fig, use_container_width=True)
 
-
 # =======================================
 # 📈 MODEL METRICS PAGE
 # =======================================
@@ -174,14 +173,16 @@ elif page == "📈 Model Metrics":
 
     y = df_metrics["target"]
 
-    X_transformed = preprocessor.transform(X)
-
-    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
-
-    y_pred = model.predict(X_transformed)
-    y_proba = model.predict_proba(X_transformed)[:, 1]
+    # ❗ NO PREPROCESSOR HERE - model already contains it
+    y_pred = model.predict(X)
+    y_proba = model.predict_proba(X)[:, 1]
 
     # Metrics Display
+    from sklearn.metrics import (
+        accuracy_score, precision_score, recall_score,
+        f1_score, roc_auc_score
+    )
+
     col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("Accuracy", round(accuracy_score(y, y_pred), 3))
     col2.metric("Precision", round(precision_score(y, y_pred), 3))
@@ -199,16 +200,6 @@ elif page == "📈 Model Metrics":
         st.pyplot(fig)
     except:
         st.info("⚠️ ROC Curve could not be displayed.")
-
-    st.write("---")
-
-    st.subheader("💡 Performance Interpretation")
-    st.info("""
-    • **High Precision** → fewer false positives  
-    • **High Recall** → fewer missed disease cases  
-    • **High AUC** → strong overall prediction performance  
-    """)
-
 
 # =======================================
 # 🩺 PREDICTION PAGE
@@ -276,3 +267,4 @@ elif page == "🩺 Prediction":
 # =======================================
 st.write("---")
 st.caption("Machine Learning Dashboard using UCI Heart Disease Dataset ❤️")
+
